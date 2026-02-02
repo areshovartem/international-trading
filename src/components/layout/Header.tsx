@@ -13,7 +13,9 @@ export default function Header() {
   const headerRef = useRef<HTMLElement | null>(null)
   const [h, setH] = useState(0)
   const [open, setOpen] = useState(false)
+  const [progress, setProgress] = useState(0)
 
+  // высота хэдера -> для spacer
   useLayoutEffect(() => {
     const el = headerRef.current
     if (!el) return
@@ -24,6 +26,21 @@ export default function Header() {
     const ro = new ResizeObserver(update)
     ro.observe(el)
     return () => ro.disconnect()
+  }, [])
+
+  // прогресс скролла
+  useEffect(() => {
+    const onScroll = () => {
+      const doc = document.documentElement
+      const scrollTop = doc.scrollTop
+      const scrollHeight = doc.scrollHeight - doc.clientHeight
+      const p = scrollHeight > 0 ? scrollTop / scrollHeight : 0
+      setProgress(p)
+    }
+
+    onScroll()
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
   // Esc + lock scroll
@@ -53,7 +70,7 @@ export default function Header() {
 
   return (
     <>
-      {/* spacer чтобы контент НЕ прыгал */}
+      {/* ✅ spacer чтобы контент НЕ залезал под fixed header */}
       <div style={{ height: h }} />
 
       <motion.header
@@ -66,10 +83,9 @@ export default function Header() {
           delay: 0.05,
         }}
         style={{ willChange: "transform" }}
-        className="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-brand-dark/70 backdrop-blur"
+        className="fixed top-0 left-0 right-0 z-50 w-full border-b border-white/10 bg-brand-dark/70 backdrop-blur"
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 lg:py-4">
-          {/* LOGO */}
           <NavLink
             to="/"
             onClick={() => setOpen(false)}
@@ -78,10 +94,9 @@ export default function Header() {
             <img
               src={logo}
               alt="International Trading"
-              className="h-12 w-12 lg:h-16 lg:w-16 object-contain"
+              className="h-12 w-12 object-contain lg:h-16 lg:w-16"
               draggable={false}
             />
-
             <div className="leading-tight">
               <div className="text-sm font-semibold uppercase tracking-[0.2em] text-white/90">
                 INTERNATIONAL
@@ -92,7 +107,6 @@ export default function Header() {
             </div>
           </NavLink>
 
-          {/* DESKTOP NAV: включаем только с lg */}
           <nav className="hidden items-center gap-6 lg:flex">
             {nav.map((item) => (
               <NavLink
@@ -107,61 +121,49 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* RIGHT */}
           <div className="flex items-center gap-2 lg:gap-3">
-            {/* desktop phone только с lg */}
             <a
               href="tel:+79181606585"
-              className="
-                hidden lg:flex items-center gap-2
-                rounded-lg border border-white/10 bg-white/5
-                px-3 py-1.5 text-xs
-                text-white/90 transition hover:bg-white/10
-                xl:px-4 xl:py-2 xl:text-sm xl:rounded-xl
-              "
+              className="hidden items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/90 transition hover:bg-white/10 lg:flex xl:px-4 xl:py-2 xl:text-sm xl:rounded-xl"
             >
-
               <PhoneCall size={16} />
               +7 (918) 160-65-85
             </a>
 
-            {/* desktop telegram только с lg */}
             <a
-                href="https://t.me/International_trading_rus"
-                target="_blank"
-                rel="noreferrer"
-                className="
-                  hidden lg:inline-flex items-center gap-2
-                  rounded-lg bg-gradient-to-r from-brand-blue to-brand-accent
-                  px-3 py-1.5 text-xs font-semibold
-                  text-white shadow-lg shadow-brand-accent/20
-                  transition hover:opacity-95
-                  xl:px-4 xl:py-2 xl:text-sm xl:rounded-xl
-                "
-              >
-
+              href="https://t.me/International_trading_rus"
+              target="_blank"
+              rel="noreferrer"
+              className="hidden items-center gap-2 rounded-lg bg-gradient-to-r from-brand-blue to-brand-accent px-3 py-1.5 text-xs font-semibold text-white shadow-lg shadow-brand-accent/20 transition hover:opacity-95 lg:inline-flex xl:px-4 xl:py-2 xl:text-sm xl:rounded-xl"
+            >
               <Send size={16} />
               Telegram
             </a>
 
-            {/* burger: показываем до lg */}
             <button
               type="button"
               onClick={() => setOpen(true)}
-              className="lg:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/90 transition hover:bg-white/10"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/90 transition hover:bg-white/10 lg:hidden"
               aria-label="Открыть меню"
             >
               <Menu size={18} />
             </button>
           </div>
         </div>
+
+        {/* ✅ progress bar */}
+        <div className="absolute left-0 right-0 bottom-0 h-[2px] bg-white/10">
+          <div
+            className="h-full origin-left bg-brand-accent"
+            style={{ transform: `scaleX(${progress})` }}
+          />
+        </div>
       </motion.header>
 
-      {/* MOBILE MENU */}
+      {/* MOBILE MENU (как у тебя) */}
       <AnimatePresence>
         {open && (
           <>
-            {/* overlay */}
             <motion.button
               type="button"
               aria-label="Закрыть меню"
@@ -172,7 +174,6 @@ export default function Header() {
               exit={{ opacity: 0 }}
             />
 
-            {/* panel: без translate, чтобы не уезжало */}
             <motion.div
               className="fixed inset-x-3 top-3 z-[70] rounded-3xl border border-white/10 bg-brand-dark/95 p-4 shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur"
               initial={{ opacity: 0, y: -10, scale: 0.98 }}
