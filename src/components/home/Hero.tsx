@@ -8,11 +8,11 @@ import { Stagger, StaggerItem } from "../Stagger" // ⚠️ путь прове�
 import { cars } from "../../data/cars" // ⚠️ путь проверь
 import carsImg from "../../assets/cars.png"
 import carCardImg from "../../assets/porsche.jpg"
-import promoVideo from "../../assets/video/promo.mp4"
 
 
 import { Play } from "lucide-react"
 
+const promoYoutubeId = "Wm_auGwZPrw"
 
 
 function fmt(n: number) {
@@ -327,10 +327,18 @@ export default function Hero() {
               </button>
             </div>
 
-            <div className="overflow-hidden rounded-3xl border border-white/10 bg-black/40 shadow-[0_40px_140px_rgba(0,0,0,0.8)]">
-              <PrettyVideo src={promoVideo} />
+           <div className="overflow-hidden rounded-3xl border border-white/10 bg-black/40 shadow-[0_40px_140px_rgba(0,0,0,0.8)]">
+  <div className="aspect-video w-full">
+    <iframe
+      className="h-full w-full"
+      src={`https://www.youtube.com/embed/${promoYoutubeId}?autoplay=1&rel=0`}
+      title="Видео • International Trading"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowFullScreen
+    />
+  </div>
+</div>
 
-            </div>
 
             <div className="mt-3 text-xs text-white/50">
               Нажмите <b>Esc</b> или кликните по фону, чтобы закрыть.
